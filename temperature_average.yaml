@@ -1,0 +1,17 @@
+- platform: template
+    sensors:
+      average_temperature:
+        friendly_name: "Average Temperature House "
+        unit_of_measurement: "°C"
+        value_template: >-
+          {%- set sensors = [
+            state_attr('climate.chambre_maite', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_eli', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maitre', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maurice', 'temperature') | default(0) | float,
+            state_attr('climate.salle_de_bain', 'temperature') | default(0) | float,
+            state_attr('climate.salle_a_manger', 'temperature') | default(0) | float,
+            state_attr('climate.salon', 'temperature') | default(0) | float,
+            state_attr('climate.sous_sol', 'temperature') | default(0) | float
+          ] -%}
+          {{ sensors | average | round(1) }}
