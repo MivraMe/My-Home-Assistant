@@ -65,7 +65,8 @@ sensor:
 
   - platform: template
     sensors:
-      total_energy_consumption:
+      total_thermostat_energy_consumption:
         friendly_name: "Consommation Thermostat"
         unit_of_measurement: "W"
         value_template: "{{ states('sensor.chambre_eli_power')|float + states('sensor.chambre_maite_power')|float + states('sensor.chambre_maitre_power')|float + states('sensor.chambre_maurice_power')|float + states('sensor.salle_a_manger_power')|float + states('sensor.salle_de_bain_power')|float + states('sensor.salon_power')|float + states('sensor.sous_sol_power')|float }}"
+        unique_id: total_thermostat_energy_consumption
