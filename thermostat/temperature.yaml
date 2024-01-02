@@ -1,7 +1,8 @@
-- platform: template
+sensor:
+  - platform: template
     sensors:
-      average_temperature:
-        friendly_name: "Average Temperature House "
+      average_temperature_house:
+        friendly_name: "Average Temperature House"
         unit_of_measurement: "°C"
         value_template: >-
           {%- set sensors = [
@@ -15,3 +16,56 @@
             state_attr('climate.sous_sol', 'temperature') | default(0) | float
           ] -%}
           {{ sensors | average | round(1) }}
+        unique_id: average_temperature_house
+
+  - platform: template
+    sensors:
+      average_temperature_chambre:
+        friendly_name: "Average Temperature Chambre"
+        unit_of_measurement: "°C"
+        value_template: >-
+          {%- set sensors = [
+            state_attr('climate.chambre_maite', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_eli', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maitre', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maurice', 'temperature') | default(0) | float
+          ] -%}
+          {{ sensors | average | round(1) }}
+        unique_id: average_temperature_chambre
+
+  - platform: template
+    sensors:
+      average_temperature_rc:
+        friendly_name: "Average Temperature RC"
+        unit_of_measurement: "°C"
+        value_template: >-
+          {%- set sensors = [
+            state_attr('climate.chambre_eli', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maitre', 'temperature') | default(0) | float,
+            state_attr('climate.salle_de_bain', 'temperature') | default(0) | float,
+            state_attr('climate.salle_a_manger', 'temperature') | default(0) | float,
+            state_attr('climate.salon', 'temperature') | default(0) | float
+          ] -%}
+          {{ sensors | average | round(1) }}
+        unique_id: average_temperature_rc
+
+  - platform: template
+    sensors:
+      average_temperature_ss:
+        friendly_name: "Average Temperature Sous-Sol"
+        unit_of_measurement: "°C"
+        value_template: >-
+          {%- set sensors = [
+            state_attr('climate.chambre_maite', 'temperature') | default(0) | float,
+            state_attr('climate.chambre_maurice', 'temperature') | default(0) | float,
+            state_attr('climate.sous_sol', 'temperature') | default(0) | float
+          ] -%}
+          {{ sensors | average | round(1) }}
+        unique_id: average_temperature_ss
+
+  - platform: template
+    sensors:
+      total_energy_consumption:
+        friendly_name: "Consommation Thermostat"
+        unit_of_measurement: "W"
+        value_template: "{{ states('sensor.chambre_eli_power')|float + states('sensor.chambre_maite_power')|float + states('sensor.chambre_maitre_power')|float + states('sensor.chambre_maurice_power')|float + states('sensor.salle_a_manger_power')|float + states('sensor.salle_de_bain_power')|float + states('sensor.salon_power')|float + states('sensor.sous_sol_power')|float }}"
