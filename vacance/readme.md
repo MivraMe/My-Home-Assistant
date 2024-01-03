@@ -5,7 +5,7 @@
 #### *Chaque personnes doit avoir un inbut boolean (helper) qui seras utilisé pour les modes vacances*
 ___
 ## Le capteur présence
-Le capteur de présence est activé si au moins une personne est à la maison
+Le capteur de présence est activé si au moins une personne est à la maison, selon les input boolean vacance
 La valeur du capteur varie de `False` à `True`
 ```
 sensor:
@@ -42,6 +42,27 @@ sensor:
              is_state('input_boolean.vacance_human2', 'on') or
              is_state('input_boolean.vacance_human3', 'on') }}
 ```
+## Le capteur absence
+Le capteur d'absence est activé si au moins une personne n'est pas à la maison
+La valeur du capteur varie de `False` à `True`
+```
+sensor:
+  - platform: template
+    sensors:
+      vacance_absence_sensor:
+        unique_id: vacance_absence_sensor
+        friendly_name: "Vacance absence"
+        value_template: >-- platform: template
+    sensors:
+      absence_parents_sensor:
+        unique_id: vacance_absence_parent_sensor
+        friendly_name: "Absence parents"
+        value_template: "{{ is_state('input_boolean.vacance_', 'on') and is_state('input_boolean.vacance_johann', 'on') }}"
+          {{ is_state('vacance_human4', 'on') or
+             is_state('input_boolean.vacance_human1', 'on') or
+             is_state('input_boolean.vacance_human2', 'on') or
+             is_state('input_boolean.vacance_human3', 'on') }}
+```
 
 ## Le capteur de 2 personnes
 Le capteur d'absence est activé si les deux personnes sont en vacance
@@ -56,6 +77,24 @@ La valeur du capteur varie de `False` à `True`
         unique_id: vacance_absence_parent_sensor
         friendly_name: "Absence parents"
         value_template: "{{ is_state('input_boolean.vacance_human1', 'on') and is_state('input_boolean.vacance_human2', 'on') }}"
+```
+
+## Le capteur de préscence matériel
+Le capteur d'absence est activé si au moins une personne est a la maison
+La valeur du capteur varie de `False` à `True`
+```
+sensor:
+  - platform: template
+    sensors:
+      prescence_maison_sensor:
+        unique_id: prescence_maison_sensor
+        friendly_name: "Préscence maison"
+        value_template: >-
+          {{ is_state('device_tracker.pixel_7', 'home') or
+            is_state('device_tracker.tiguan_iphonedjacinthe_wireless', 'home') or
+            is_state('device_tracker.iphone_de_jo', 'home') or
+            is_state('device_tracker.pixel_4a_2', 'home') }}
+
 ```
 
 # NON TESTÉ
