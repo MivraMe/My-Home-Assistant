@@ -1,0 +1,39 @@
+sensor:
+  - platform: template
+    sensors:
+      vacance_presence_sensor:
+        unique_id: vacance_presence_sensor
+        friendly_name: "Vacance présence"
+        value_template: >-
+          {{ is_state('input_vacance_eli', 'off') or
+             is_state('input_boolean.vacance_jacinthe', 'off') or
+             is_state('input_boolean.vacance_johann', 'off') or
+             is_state('input_boolean.vacance_maite', 'off') }}
+
+  - platform: template
+    sensors:
+      vacance_absence_sensor:
+        unique_id: vacance_absence_sensor
+        friendly_name: "Vacance absence"
+        value_template: >-
+          {{ is_state('input_vacance_eli', 'on') or
+             is_state('input_boolean.vacance_jacinthe', 'on') or
+             is_state('input_boolean.vacance_johann', 'on') or
+             is_state('input_boolean.vacance_maite', 'on') }}
+
+  - platform: template
+    sensors:
+      personnes_2_plus_absentes_sensor:
+        unique_id: personnes_2_plus_absentes_sensor
+        friendly_name: "Personnes 2+ Absentes"
+        value_template: >-
+          {% set personnes_presentes = [states('device_tracker.tiguan_iphonedjacinthe_wireless'), states('device_tracker.iphone_de_jo'), states('device_tracker.pixel_4a_2'), states('device_tracker.pixel_7')] %}
+          {% set personnes_absentes = personnes_presentes | selectattr('state','eq','not_home') | list %}
+          {{ 'on' if personnes_absentes | length >= 2 else 'off' }}
+
+  - platform: template
+    sensors:
+      absence_parents_sensor:
+        unique_id: vacance_absence_parent_sensor
+        friendly_name: "Absence parents"
+        value_template: "{{ is_state('input_boolean.vacance_', 'on') and is_state('input_boolean.vacance_johann', 'on') }}"
