@@ -1,0 +1,108 @@
+# Setup les input booleans qui vont servir de déclencheur manuel :(
+input_boolean:
+  next_peak_critical_am_today_manual:
+    name: Next peak critical AM today manual
+    icon: mdi:thermometer-alert
+    initial: off
+
+  next_peak_critical_pm_today_manual:
+    name: Next peak critical PM today manual
+    icon: mdi:thermometer-alert
+    initial: off
+
+  next_peak_critical_am_tomorrow_manual:
+    name: Next peak critical AM tomorrow manual
+    icon: mdi:clock-alert-outline
+    initial: off
+
+  next_peak_critical_pm_tomorrow_manual:
+    name: Next peak critical PM tomorrow manual
+    icon: mdi:clock-alert-outline
+    initial: off
+
+# Les switch
+# Ajuste le next peak avec l'heure
+binary_sensor:
+  - platform: template
+    sensors:
+      next_peak_critical:
+        friendly_name: "Next Peak Critical"
+        value_template: >-
+          {% set current_hour = now().hour %}
+          {% set current_time_condition = current_hour < 9 %}
+          {% set next_peak_critical_am_on = is_state('input_boolean.next_peak_critical_am_today_manual', 'on') %}
+          {% set next_peak_critical_pm_on = is_state('input_boolean.next_peak_critical_pm_today_manual', 'on') %}
+          {% set hydroqc_maison_next_peak_on = is_state('binary_sensor.hydroqc_maison_next_peak_period_critical', 'on') %}
+
+          {% if hydroqc_maison_next_peak_on %}
+            on
+          {% elif current_time_condition and next_peak_critical_am_on %}
+            on
+          {% elif not current_time_condition and next_peak_critical_pm_on %}
+            on
+          {% else %}
+            off
+          {% endif %}
+        icon_template: mdi:flash-alert
+      critical_evening_peak_today:
+        friendly_name: "Critical evening peak today"
+        icon_template: mdi:message-flash
+        value_template: >-
+          {{ is_state('input_boolean.next_peak_critical_pm_today_manual', 'on') }}
+
+      critical_evening_peak_tomorrow:
+        friendly_name: "Critical evening peak tomorrow"
+        icon_template: mdi:message-flash
+        value_template: >-
+          {{ is_state('input_boolean.next_peak_critical_pm_tomorrow_manual', 'on') or is_state('binary_sensor.hydroqc_maison_critical_evening_peak_tomorrow', 'on')}}
+
+      critical_morning_peak_today:
+        friendly_name: "Critical morning peak today"
+        icon_template: mdi:message-flash
+        value_template: >-
+          {{ is_state('input_boolean.next_peak_critical_am_today_manual', 'on') }}
+
+      critical_morning_peak_tomorrow:
+        friendly_name: "Critical morning peak tomorrow"
+        icon_template: mdi:message-flash
+        value_template: >-
+          {{ is_state('input_boolean.next_peak_critical_am_tomorrow_manual', 'on') or is_state('binary_sensor.hydroqc_maison_critical_morning_peak_tomorrow', 'on')}}
+
+automation:
+  - alias: "Toggle Peak Input Booleans"
+    trigger:
+      platform: time
+      at: "00:00:00"
+    action:
+      - service: script.toggle_peak_input_booleans_today
+      - service: script.toggle_peak_input_booleans_am
+      - service: script.toggle_peak_input_booleans_pm
+
+
+script:
+  toggle_peak_input_booleans_today:
+    sequence:
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.next_peak_critical_pm_today_manual
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.next_peak_critical_am_today_manual
+
+  toggle_peak_input_booleans_am:
+    sequence:
+      - condition: state
+        entity_id: input_boolean.next_peak_critical_am_tomorrow_manual
+        state: "on"
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.next_peak_critical_am_tomorrow_manual
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.next_peak_critical_am_today_manual
+
+  toggle_peak_input_booleans_pm:
+    sequence:
+      - condition: state
+        entity_id: input_boolean.next_peak_critical_pm_tomorrow_manual
+        state: "on"
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.next_peak_critical_pm_tomorrow_manual
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.next_peak_critical_am_today_manual
